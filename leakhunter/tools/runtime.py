@@ -39,9 +39,7 @@ class ToolRuntime:
         started = time.perf_counter()
         tool = self.registry.get(name)
         if tool is None:
-            return self._finish(
-                name, step, trace, started, 0, ErrorKind.invalid_arguments, f"unknown tool '{name}'"
-            )
+            return self._finish(name, step, trace, started, 0, ErrorKind.invalid_arguments, f"unknown tool '{name}'")
         try:
             args = tool.spec.args_model.model_validate(raw_args)
         except ValidationError as exc:
@@ -91,9 +89,7 @@ class ToolRuntime:
         message: str,
     ) -> ToolResult:
         if attempts == 0:
-            trace(
-                TraceEvent(step=step, name=f"tool:{name}", status="error", detail={"error_kind": kind.value})
-            )
+            trace(TraceEvent(step=step, name=f"tool:{name}", status="error", detail={"error_kind": kind.value}))
         log.warning("tool failed", extra={"tool": name, "error_kind": kind.value, "attempts": attempts})
         return ToolResult(
             tool=name,
@@ -118,9 +114,7 @@ class ToolRuntime:
         detail: dict[str, Any] = {"attempt": attempt}
         if kind is not None:
             detail.update(error_kind=kind.value, error=message)
-        trace(
-            TraceEvent(step=step, name=f"tool:{name}", status=status, duration_ms=_ms(started), detail=detail)
-        )
+        trace(TraceEvent(step=step, name=f"tool:{name}", status=status, duration_ms=_ms(started), detail=detail))
         log.info("tool attempt", extra={"tool": name, "attempt": attempt, "status": status})
 
 

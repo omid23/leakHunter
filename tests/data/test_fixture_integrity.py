@@ -29,9 +29,7 @@ def test_clean_exports_have_expected_columns_rows_and_unique_keys(period, count)
 
 
 def test_every_billed_resource_is_in_the_inventory():
-    inventory = {
-        r["resource_id"] for r in json.loads((FIXTURES_DIR / "resources.json").read_text())["resources"]
-    }
+    inventory = {r["resource_id"] for r in json.loads((FIXTURES_DIR / "resources.json").read_text())["resources"]}
     billed = {r[4] for period in CLEAN for r in rows(f"billing_{period}.csv")[1:]}
     assert billed <= inventory
 
@@ -45,7 +43,5 @@ def test_malformed_variant_is_clean_october_plus_five_bad_rows():
 
 def test_manifest_lists_every_file():
     manifest = json.loads((FIXTURES_DIR / "manifest.json").read_text())
-    files = {e["file"] for e in manifest["exports"].values()} | {
-        e["file"] for e in manifest["variants"].values()
-    }
+    files = {e["file"] for e in manifest["exports"].values()} | {e["file"] for e in manifest["variants"].values()}
     assert all((FIXTURES_DIR / f).exists() for f in files)

@@ -107,9 +107,7 @@ def rows_for(period: str) -> list[list[str]]:
         for resource_id, (service, usage_type, env, amount, costs) in RESOURCES.items():
             if period in costs:
                 usage_date = f"{period}-{day:02d}"
-                rows.append(
-                    [period, usage_date, service, usage_type, resource_id, str(amount), costs[period], env]
-                )
+                rows.append([period, usage_date, service, usage_type, resource_id, str(amount), costs[period], env])
     return rows
 
 

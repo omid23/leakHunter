@@ -4,9 +4,7 @@ from leakhunter.domain.analysis import compare, previous_period, resource_cost, 
 from leakhunter.domain.models import CostLineItem
 
 
-def item(
-    rid: str, cost: float, service: str = "AmazonEC2", day: int = 1, period: str = "2026-10"
-) -> CostLineItem:
+def item(rid: str, cost: float, service: str = "AmazonEC2", day: int = 1, period: str = "2026-10") -> CostLineItem:
     year, month = (int(p) for p in period.split("-"))
     return CostLineItem(
         usage_date=date(year, month, day),
@@ -20,9 +18,7 @@ def item(
 
 
 def test_summarize_totals_by_service_and_resource():
-    summary = summarize(
-        "2026-10", [item("a", 1.25), item("a", 1.25, day=2), item("b", 3.0, service="AmazonS3")]
-    )
+    summary = summarize("2026-10", [item("a", 1.25), item("a", 1.25, day=2), item("b", 3.0, service="AmazonS3")])
     assert summary.total == 5.5
     assert summary.by_service == {"AmazonEC2": 2.5, "AmazonS3": 3.0}
     assert [(r.resource_id, r.cost) for r in summary.by_resource] == [("b", 3.0), ("a", 2.5)]

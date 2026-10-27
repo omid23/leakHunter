@@ -35,7 +35,7 @@ leakhunter = ["data/fixtures/*", "api/static/*"]
 evals = ["dataset.json"]
 
 [tool.ruff]
-line-length = 110
+line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]

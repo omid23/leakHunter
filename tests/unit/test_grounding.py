@@ -50,7 +50,5 @@ def test_tolerance_allows_rounded_narration():
 
 
 def test_corrections_make_grounding_fail():
-    correction = ProposalCorrection(
-        resource_id="i-1", field="estimated_monthly_saving", claimed=900, corrected=571.39
-    )
+    correction = ProposalCorrection(resource_id="i-1", field="estimated_monthly_saving", claimed=900, corrected=571.39)
     assert not check_grounding(report("ok"), {571.39, 2.1}, [correction]).ok

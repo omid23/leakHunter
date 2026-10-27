@@ -90,9 +90,7 @@ def compare(
                 delta_pct=pct(delta, before),
             )
         )
-    movers = sorted(
-        (d for d in deltas if (d.delta_abs or 0) > 0), key=lambda d: (-(d.delta_abs or 0), d.resource_id)
-    )
+    movers = sorted((d for d in deltas if (d.delta_abs or 0) > 0), key=lambda d: (-(d.delta_abs or 0), d.resource_id))
     delta_total = money(current.total - previous.total)
     delta_pct = pct(delta_total, previous.total)
     return CostComparison(
