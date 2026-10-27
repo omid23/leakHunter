@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from leakhunter import __version__
 from leakhunter.api.auth import AuthError
@@ -13,6 +16,8 @@ from leakhunter.bootstrap import Services, build_services
 from leakhunter.config import Settings
 from leakhunter.domain.errors import InvalidTransition, RunNotFound, UnknownActionId
 from leakhunter.logging_setup import configure_logging
+
+STATIC_DIR = Path(__file__).parent / "static"
 
 ERROR_STATUS: dict[type[Exception], tuple[int, str]] = {
     InvalidTransition: (409, "invalid_transition"),
@@ -31,6 +36,11 @@ def create_app(settings: Settings | None = None, services: Services | None = Non
     app = FastAPI(title="LeakHunter", version=__version__, description="Cloud cost remediation agent")
     app.state.services = services
     app.include_router(router)
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+    @app.get("/", include_in_schema=False)
+    async def index() -> FileResponse:
+        return FileResponse(STATIC_DIR / "index.html")
 
     @app.exception_handler(AuthError)
     async def _auth(_: Request, exc: AuthError) -> JSONResponse:
