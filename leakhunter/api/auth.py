@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -42,7 +43,7 @@ def resolve_principal(api_key: str | None, settings: Settings) -> Principal:
     raise AuthError(401, "unauthorized", "invalid API key")
 
 
-def require_role(role: Role):  # type: ignore[no-untyped-def]
+def require_role(role: Role) -> Callable[..., Awaitable[Principal]]:
     async def dependency(request: Request, api_key: str | None = Depends(api_key_header)) -> Principal:
         principal = resolve_principal(api_key, request.app.state.services.settings)
         if role is Role.operator and principal.role is not Role.operator:

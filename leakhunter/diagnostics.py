@@ -20,7 +20,7 @@ SCENARIOS: list[tuple[str, str, list[FaultKind]]] = [
 
 
 async def export(out_dir: Path) -> list[Path]:
-    settings = Settings(_env_file=None, tool_timeout_s=0.05, fault_timeout_sleep_s=0.2, tool_retry_backoff_s=0)  # type: ignore[call-arg]
+    settings = Settings(_env_file=None, tool_timeout_s=0.05, fault_timeout_sleep_s=0.2, tool_retry_backoff_s=0)
     service = build_services(settings).service
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []

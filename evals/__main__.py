@@ -17,7 +17,7 @@ from leakhunter.logging_setup import configure_logging
 def eval_settings(client: str) -> Settings:
     if client == "scripted":
         return Settings(
-            _env_file=None,  # type: ignore[call-arg]
+            _env_file=None,
             llm_provider="scripted",
             tool_timeout_s=0.05,
             fault_timeout_sleep_s=0.2,

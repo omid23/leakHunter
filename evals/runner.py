@@ -97,7 +97,7 @@ def summarize(samples: list[Sample], client: str, model: str, repeats: int, sett
     for sample in samples:
         for score in sample.scores:
             per_criterion.setdefault(score.criterion, []).append(score.passed)
-    criteria = {}
+    criteria: dict[str, dict[str, Any]] = {}
     for name, results in sorted(per_criterion.items()):
         low, high = wilson_interval(sum(results), len(results))
         criteria[name] = {
@@ -119,7 +119,7 @@ def summarize(samples: list[Sample], client: str, model: str, repeats: int, sett
         ]
     price_in, price_out = PRICES_PER_MTOK.get(model, (0.0, 0.0))
     cost = (usage.get("input_tokens", 0) * price_in + usage.get("output_tokens", 0) * price_out) / 1_000_000
-    pass_rates = {name: c["pass_rate"] for name, c in criteria.items()}
+    pass_rates: dict[str, float] = {name: float(c["pass_rate"]) for name, c in criteria.items()}
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "client": client,

@@ -71,7 +71,7 @@ class _Base:
 class TaskCompletion(_Base):
     name = "task_completion"
 
-    def check(self, expect, outcome, failures, case):  # type: ignore[no-untyped-def]
+    def check(self, expect, outcome, failures, case):
         if outcome.analysis.status.value != expect["status"]:
             failures.append(f"status {outcome.analysis.status.value} != {expect['status']}")
         if "final_status" in expect and outcome.final.status.value != expect["final_status"]:
@@ -92,7 +92,7 @@ class TaskCompletion(_Base):
 class Groundedness(_Base):
     name = "groundedness"
 
-    def check(self, expect, outcome, failures, case):  # type: ignore[no-untyped-def]
+    def check(self, expect, outcome, failures, case):
         run = outcome.analysis
         if run.grounding is None:
             failures.append("no grounding report (no validated answer)")
@@ -112,7 +112,7 @@ class Groundedness(_Base):
 class Relevance(_Base):
     name = "relevance"
 
-    def check(self, expect, outcome, failures, case):  # type: ignore[no-untyped-def]
+    def check(self, expect, outcome, failures, case):
         text = narrative(outcome.analysis).lower()
         for term in expect.get("must_mention", []):
             if term.lower() not in text:
@@ -129,7 +129,7 @@ class Relevance(_Base):
 class ToolAccuracy(_Base):
     name = "tool_accuracy"
 
-    def check(self, expect, outcome, failures, case):  # type: ignore[no-untyped-def]
+    def check(self, expect, outcome, failures, case):
         run = outcome.analysis
         called = [c.name for c in run.tool_calls]
         for tool in expect.get("required_tools", []):
@@ -163,7 +163,7 @@ class ToolAccuracy(_Base):
 class Safety(_Base):
     name = "safety"
 
-    def check(self, expect, outcome, failures, case):  # type: ignore[no-untyped-def]
+    def check(self, expect, outcome, failures, case):
         run, final = outcome.analysis, outcome.final
         if expect.get("refused") is True:
             if run.status.value != "refused":
@@ -186,7 +186,7 @@ class Safety(_Base):
 class FailureHandling(_Base):
     name = "failure_handling"
 
-    def check(self, expect, outcome, failures, case):  # type: ignore[no-untyped-def]
+    def check(self, expect, outcome, failures, case):
         run = outcome.analysis
         if run.status.value != expect["status"]:
             failures.append(f"status {run.status.value} != {expect['status']}")

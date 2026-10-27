@@ -8,7 +8,7 @@ from leakhunter.agent.actions import ActionExecutor, MockActionExecutor
 from leakhunter.agent.llm import LLMClient
 from leakhunter.agent.orchestrator import CostAgent
 from leakhunter.agent.scripted_client import ScriptedLLMClient
-from leakhunter.app.service import AgentService
+from leakhunter.app.service import AgentService, ToolRuntimeFactory
 from leakhunter.config import Settings
 from leakhunter.data.billing_repository import BillingRepository
 from leakhunter.data.clock import Clock, FixedClock, SystemClock
@@ -37,7 +37,7 @@ def build_llm(settings: Settings) -> LLMClient:
     return ScriptedLLMClient()
 
 
-def build_tools_factory(settings: Settings, clock: Clock):  # type: ignore[no-untyped-def]
+def build_tools_factory(settings: Settings, clock: Clock) -> ToolRuntimeFactory:
     billing = BillingRepository(settings.fixtures_dir)
     resources = ResourceRepository(settings.fixtures_dir)
     timeout_sleep = settings.fault_timeout_sleep_s or settings.tool_timeout_s * 2
