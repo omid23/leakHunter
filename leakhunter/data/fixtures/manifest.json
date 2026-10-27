@@ -1,0 +1,23 @@
+{
+  "exports": {
+    "2026-08": {
+      "file": "billing_2026-08.csv",
+      "generated_at": "2026-11-01T06:00:00Z"
+    },
+    "2026-09": {
+      "file": "billing_2026-09.csv",
+      "generated_at": "2026-11-01T06:00:00Z"
+    },
+    "2026-10": {
+      "file": "billing_2026-10.csv",
+      "generated_at": "2026-11-01T06:00:00Z"
+    }
+  },
+  "variants": {
+    "malformed": {
+      "period": "2026-10",
+      "file": "billing_2026-10_malformed.csv",
+      "generated_at": "2026-11-01T06:00:00Z"
+    }
+  }
+}
