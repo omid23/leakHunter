@@ -38,3 +38,17 @@ def services(settings):
 @pytest.fixture
 def service(services):
     return services.service
+
+
+VIEWER = {"X-API-Key": "viewer-dev-key"}
+OPERATOR = {"X-API-Key": "operator-dev-key"}
+
+
+@pytest.fixture
+def client(services):
+    from fastapi.testclient import TestClient
+
+    from leakhunter.api.app import create_app
+
+    with TestClient(create_app(services=services)) as test_client:
+        yield test_client

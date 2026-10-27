@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, Request, status
 
 from leakhunter.agent.prompts import PROMPT_VERSION
@@ -53,12 +55,13 @@ async def create_run(
     return await service.run_question(body.question, body.faults)
 
 
-@router.get("/runs", response_model=list[RunState], response_model_exclude=SUMMARY_EXCLUDE)
+@router.get("/runs")
 async def list_runs(
     _: Principal = Depends(require_role(Role.viewer)),
     service: AgentService = Depends(get_service),
-) -> list[RunState]:
-    return await service.list()
+) -> list[dict[str, Any]]:
+    """Run summaries, newest first (the heavy fields are only on GET /api/runs/{id})."""
+    return [run.model_dump(mode="json", exclude=SUMMARY_EXCLUDE) for run in await service.list()]
 
 
 @router.get("/runs/{run_id}", response_model=RunState)
