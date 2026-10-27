@@ -155,6 +155,10 @@ class CostAgent:
         except asyncio.TimeoutError as exc:
             raise LLMUnavailableError(f"no response within {self.settings.llm_timeout_s:g}s") from exc
         run.add_usage(response.usage)
+        log.info(
+            "llm call",
+            extra={"step": step, "stop_reason": response.stop_reason, "usage": response.usage, "model": response.model},
+        )
         self._trace(
             run,
             step,
