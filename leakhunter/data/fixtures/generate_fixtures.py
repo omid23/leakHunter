@@ -85,7 +85,16 @@ MALFORMED_ROWS = [
     ["2026-10", "2026-10-15", "AmazonEC2", "BoxUsage:m5.large", "asg-web-prod", "48", "-12.2400", "prod"],
     ["2026-10", "2026-10-16", "AmazonRDS", "InstanceUsage:db.r5.large", "db-prod-main", "24", "N/A", "prod"],
     ["2026-10", "2026-10-17", "AmazonS3", "TimedStorage-ByteHrs", "", "6000", "4.2000", "prod"],
-    ["2026-10", "2026-13-45", "AmazonVPC", "NatGateway-Hours", "nat-0123456789abcdef0", "24", "1.1000", "prod"],
+    [
+        "2026-10",
+        "2026-13-45",
+        "AmazonVPC",
+        "NatGateway-Hours",
+        "nat-0123456789abcdef0",
+        "24",
+        "1.1000",
+        "prod",
+    ],
     ["2026-10", "2026-10-18", "AmazonEC2", "BoxUsage:t3.micro", "i-0c9d8e7f6a5b43210", "24"],
 ]
 
