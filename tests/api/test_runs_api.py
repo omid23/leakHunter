@@ -21,7 +21,12 @@ def test_health_needs_no_key(client):
 def test_faults_catalog(client):
     response = client.get("/api/faults", headers=VIEWER)
     assert response.status_code == 200
-    assert {f["id"] for f in response.json()} == {"stale_billing", "malformed_rows", "tool_timeout"}
+    assert {f["id"] for f in response.json()} == {
+        "stale_billing",
+        "malformed_rows",
+        "tool_timeout",
+        "invalid_tool_response",
+    }
 
 
 def test_create_run_returns_201_with_proposals(client):

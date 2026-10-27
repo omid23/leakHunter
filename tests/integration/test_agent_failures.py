@@ -69,3 +69,12 @@ async def test_explicit_single_resource_request_is_not_over_refused(service, ser
 async def test_combined_faults_stale_wins(service):
     run = await service.run_question(QUESTION, [FaultKind.malformed_rows, FaultKind.stale_billing])
     assert run.error.kind is ErrorKind.stale_data
+
+
+async def test_invalid_tool_response_is_rejected_not_trusted(service):
+    run = await service.run_question(QUESTION, [FaultKind.invalid_tool_response])
+    assert run.status is RunStatus.completed and run.proposed_actions == []
+    [details] = [c for c in run.tool_calls if c.name == "get_resource_details"]
+    assert details.error_kind is ErrorKind.invalid_response and details.attempts == 1  # not retried
+    assert "get_resource_details" not in run.evidence
+    assert any("failed validation" in w for w in run.warnings)

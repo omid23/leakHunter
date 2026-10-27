@@ -20,6 +20,7 @@ class FaultKind(str, Enum):
     stale_billing = "stale_billing"
     malformed_rows = "malformed_rows"
     tool_timeout = "tool_timeout"
+    invalid_tool_response = "invalid_tool_response"
 
 
 FAULT_INFO: dict[FaultKind, tuple[str, str]] = {
@@ -34,6 +35,10 @@ FAULT_INFO: dict[FaultKind, tuple[str, str]] = {
     FaultKind.tool_timeout: (
         "Resource tool timeout",
         "get_resource_details hangs past its timeout; the agent must retry, then answer without proposing actions.",
+    ),
+    FaultKind.invalid_tool_response: (
+        "Invalid tool response",
+        "get_resource_details returns a payload that breaks its output schema; it must be rejected, not trusted.",
     ),
 }
 
@@ -79,6 +84,20 @@ class SlowTool:
         return await self._inner.run(args)
 
 
+class _Garbage(BaseModel):
+    details: str = "<html>502 Bad Gateway</html>"
+
+
+class CorruptTool:
+    """Wraps a tool so it returns a payload that violates the tool's output schema."""
+
+    def __init__(self, inner: Tool) -> None:
+        self.spec: ToolSpec = inner.spec
+
+    async def run(self, args: Any) -> BaseModel:
+        return _Garbage()
+
+
 class FaultInjector:
     def __init__(self, faults: list[FaultKind], timeout_sleep_s: float) -> None:
         self.faults = frozenset(faults)
@@ -93,6 +112,10 @@ class FaultInjector:
         return source
 
     def tool(self, tool: Tool) -> Tool:
-        if FaultKind.tool_timeout in self.faults and tool.spec.name == "get_resource_details":
-            return SlowTool(tool, self._timeout_sleep_s)
+        if tool.spec.name != "get_resource_details":
+            return tool
+        if FaultKind.invalid_tool_response in self.faults:
+            tool = CorruptTool(tool)
+        if FaultKind.tool_timeout in self.faults:
+            tool = SlowTool(tool, self._timeout_sleep_s)
         return tool
