@@ -197,7 +197,7 @@ wrongly, (5) a broken critical UI flow.
 | Browser | `tests/browser/` (Playwright) | analyze → evidence → approve one action → `stopped (mock)` → trace; refused, stale and timeout paths; screenshots |
 | Evals | `tests/evals/` | dataset schema and coverage, harness sanity, the 100 % scripted gate |
 
-Current run: **205 tests passing** (201 in the main suite plus 4 browser tests; 1 live-model test skipped without a key). Coverage and JUnit output are in `reports/`.
+Current run: **205 tests passing** (201 in the main suite plus 4 browser tests; 1 live-model test skipped without a key). Line coverage is 95 % (`reports/coverage.txt`), and JUnit XML is in `reports/`.
 
 ---
 

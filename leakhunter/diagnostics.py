@@ -9,6 +9,7 @@ from pathlib import Path
 
 from leakhunter.bootstrap import build_services
 from leakhunter.config import Settings
+from leakhunter.logging_setup import configure_logging
 from leakhunter.tools.faults import FaultKind
 
 SCENARIOS: list[tuple[str, str, list[FaultKind]]] = [
@@ -35,6 +36,7 @@ async def export(out_dir: Path) -> list[Path]:
 
 
 if __name__ == "__main__":
+    configure_logging("ERROR")
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("reports") / "traces"
     for written_path in asyncio.run(export(target)):
         print(written_path)
