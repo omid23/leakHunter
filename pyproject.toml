@@ -57,4 +57,5 @@ markers = [
     "evals: executable AI evaluation tests",
     "anthropic: tests that call the real Anthropic API (skipped without a key)",
 ]
-addopts = "-ra"
+# Browser tests run in their own process (Playwright's sync loop clashes with pytest-asyncio): pytest -m browser
+addopts = "-ra -m 'not browser'"
