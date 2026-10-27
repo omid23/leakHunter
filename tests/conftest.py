@@ -26,3 +26,15 @@ def settings() -> Settings:
 @pytest.fixture
 def fixtures_dir():
     return FIXTURES_DIR
+
+
+@pytest.fixture
+def services(settings):
+    from leakhunter.bootstrap import build_services
+
+    return build_services(settings)
+
+
+@pytest.fixture
+def service(services):
+    return services.service
