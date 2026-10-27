@@ -1,3 +1,26 @@
+# Source documents (kept private)
 task.docx
 topic.txt
-.idea
+
+# IDE / environments
+.idea/
+.vscode/
+.venv/
+venv/
+.env
+
+# Python caches and build output
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local eval / test output (representative copies are committed under reports/)
+reports/evals/local/
+test-results/
