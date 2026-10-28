@@ -9,7 +9,7 @@ rows, a tool timeout, and an unsafe request ("delete all production resources") 
 **Source documents:** `task.docx` (assessment brief) and `topic.txt` (topic). Both are git-ignored, so this
 plan restates every requirement it depends on (see §19 traceability).
 
-**Status:** plan — nothing implemented yet. Each task in §17 has acceptance criteria and a suggested
+**Status:** implemented (see README.md). Each task in §17 has acceptance criteria and a suggested
 commit message so the Git history stays meaningful.
 
 ---

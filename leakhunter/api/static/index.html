@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LeakHunter</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header>
+  <h1>LeakHunter</h1>
+  <p class="tagline">Explains AWS bill spikes from billing evidence and proposes fixes that a human approves.</p>
+</header>
+<main>
+  <section class="card" aria-labelledby="ask-title">
+    <h2 id="ask-title">Ask</h2>
+    <label for="question">Question</label>
+    <textarea id="question" data-testid="question-input" rows="2" maxlength="500">Why did our AWS bill spike?</textarea>
+    <fieldset>
+      <legend>Inject failures</legend>
+      <div id="faults" data-testid="fault-list"></div>
+    </fieldset>
+    <label for="api-key">API key</label>
+    <input id="api-key" data-testid="api-key-input" value="operator-dev-key" autocomplete="off">
+    <div class="row">
+      <button id="analyze" data-testid="analyze-button" class="primary">Analyze</button>
+      <button id="unsafe" data-testid="unsafe-button" type="button">Try an unsafe request</button>
+    </div>
+  </section>
+
+  <section id="result" class="card" hidden aria-live="polite">
+    <div class="row spread">
+      <h2>Result</h2>
+      <span id="status" data-testid="status-badge" class="badge"></span>
+    </div>
+    <div id="refusal" data-testid="refusal-banner" class="banner refusal" hidden></div>
+    <div id="error" data-testid="error-banner" class="banner error" hidden></div>
+    <ul id="warnings" data-testid="warnings" class="warnings"></ul>
+    <p id="summary" data-testid="summary"></p>
+    <span id="grounding" data-testid="grounding-badge" class="badge" hidden></span>
+
+    <div id="causes-block" hidden>
+      <h3>Root causes</h3>
+      <ul id="causes" data-testid="root-causes"></ul>
+    </div>
+
+    <div id="findings-block" hidden>
+      <h3>Findings</h3>
+      <div class="table-wrap">
+        <table data-testid="findings-table">
+          <thead><tr><th>Resource</th><th>Signal</th><th>Current</th><th>Previous</th><th>Est. monthly saving</th></tr></thead>
+          <tbody id="findings"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="actions-block" hidden>
+      <h3>Proposed actions <small>(nothing runs until you approve)</small></h3>
+      <ul id="actions" data-testid="actions" class="actions"></ul>
+      <div class="row">
+        <button id="approve" data-testid="approve-button" class="primary">Approve selected</button>
+        <button id="reject" data-testid="reject-button">Reject</button>
+      </div>
+    </div>
+
+    <div id="executions-block" hidden>
+      <h3>Execution results</h3>
+      <ul id="executions" data-testid="executions"></ul>
+    </div>
+
+    <ul id="caveats" data-testid="caveats" class="caveats"></ul>
+
+    <details data-testid="trace">
+      <summary>Trace (<span id="trace-count">0</span> events)</summary>
+      <div class="table-wrap">
+        <table><thead><tr><th>Step</th><th>Event</th><th>Status</th><th>ms</th><th>Detail</th></tr></thead>
+          <tbody id="trace"></tbody></table>
+      </div>
+    </details>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

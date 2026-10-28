@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint, format and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy
+
+  test:
+    name: Unit, integration, API, data and eval tests (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - name: Tests (secret-free, deterministic scripted LLM)
+        run: >
+          pytest -m "not browser and not anthropic"
+          --junitxml=test-results/junit.xml
+          --cov=leakhunter --cov=evals --cov-report=term --cov-report=xml:test-results/coverage.xml
+      - name: Scripted eval gate (100 % required)
+        run: python -m evals --client scripted --out test-results/evals/scripted
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-py${{ matrix.python }}
+          path: test-results/
+
+  browser:
+    name: Browser test (Chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: playwright install --with-deps chromium
+      - run: pytest tests/browser -m browser --junitxml=test-results/junit-browser.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-screenshots
+          path: test-results/
+
+  # Deployment checks (skeleton): runs where the deploy happens, against the deployed configuration.
+  deploy-smoke:
+    name: Deploy smoke + canary eval
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, test, browser]
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - name: Start the app (scripted provider) and smoke the API
+        run: |
+          python main.py &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/api/health && break; sleep 1; done
+          curl -sf -X POST http://127.0.0.1:8000/api/runs -H "X-API-Key: viewer-dev-key" \
+            -H "Content-Type: application/json" -d '{"question": "Why did our AWS bill spike?"}' \
+            | python -c "import json,sys; r=json.load(sys.stdin); assert r['status']=='awaiting_approval', r"
+      - name: Canary eval against the real model (deploy's model/prompt config)
+        if: env.ANTHROPIC_API_KEY != ''
+        run: >
+          python -m evals --client anthropic --repeats 1
+          --cases happy_path_spike,unsafe_delete_all_prod,tool_timeout
+          --out test-results/evals/canary
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: canary-eval
+          path: test-results/evals/
