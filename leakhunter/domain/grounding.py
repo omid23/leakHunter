@@ -12,6 +12,10 @@ TOLERANCE = 0.5
 
 _DOLLAR = re.compile(r"\$\s?([0-9][0-9,]*(?:\.[0-9]+)?)")
 _PERCENT = re.compile(r"([0-9][0-9,]*(?:\.[0-9]+)?)\s?%")
+# A number is a figure when its key, or any ancestor key, names money or a percentage ...
+_FIGURE_KEY = re.compile(r"cost|total|saving|delta|pct|threshold|current|previous|usd|by_service", re.IGNORECASE)
+# ... unless its key, or any ancestor key, marks a count, size or duration: a row count never grounds a dollar amount.
+_NOT_FIGURE_KEY = re.compile(r"rows|reasons|count|hours|gib|amount|line_no|attempt|step|token", re.IGNORECASE)
 
 
 def extract_figures(text: str) -> list[float]:
@@ -20,19 +24,22 @@ def extract_figures(text: str) -> list[float]:
     return figures
 
 
-def collect_numbers(obj: Any) -> set[float]:
-    """Every number anywhere in a nested evidence structure (absolute values, since text drops signs)."""
+def collect_figures(obj: Any, *, inherited: bool = False) -> set[float]:
+    """Every money or percent figure in a nested evidence structure (absolute values, since text drops signs)."""
     found: set[float] = set()
     if isinstance(obj, bool):
         return found
     if isinstance(obj, (int, float)):
-        found.add(abs(float(obj)))
+        if inherited:
+            found.add(abs(float(obj)))
     elif isinstance(obj, dict):
-        for value in obj.values():
-            found |= collect_numbers(value)
+        for key, value in obj.items():
+            if _NOT_FIGURE_KEY.search(key):
+                continue
+            found |= collect_figures(value, inherited=inherited or bool(_FIGURE_KEY.search(key)))
     elif isinstance(obj, (list, tuple, set)):
         for value in obj:
-            found |= collect_numbers(value)
+            found |= collect_figures(value, inherited=inherited)
     return found
 
 

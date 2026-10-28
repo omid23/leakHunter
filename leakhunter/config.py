@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 FIXTURES_DIR = Path(__file__).parent / "data" / "fixtures"
@@ -20,29 +20,29 @@ class Settings(BaseSettings):
     model: str = "claude-opus-5-5"
     effort: Literal["low", "medium", "high", "xhigh", "max"] = "medium"
     llm_fallbacks: bool = True
-    llm_timeout_s: float = 60.0
-    llm_max_tokens: int = 8000
-    max_steps: int = 6
-    max_repair_turns: int = 1
+    llm_timeout_s: float = Field(60.0, gt=0)
+    llm_max_tokens: int = Field(8000, ge=256)
+    max_steps: int = Field(6, ge=1)
+    max_repair_turns: int = Field(1, ge=0)
 
     # Time & data
     now: datetime | None = datetime.fromisoformat("2026-11-02T09:00:00+00:00")
-    current_period: str = "2026-10"
+    current_period: str = Field("2026-10", pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
     fixtures_dir: Path = FIXTURES_DIR
-    stale_after_hours: float = 48.0
-    malformed_fail_ratio: float = 0.2
+    stale_after_hours: float = Field(48.0, gt=0)
+    malformed_fail_ratio: float = Field(0.2, ge=0, le=1)
 
     # Analysis
-    idle_cpu_threshold_pct: float = 5.0
-    min_action_saving_usd: float = 20.0
-    spike_threshold_pct: float = 10.0
-    top_movers_limit: int = 5
+    idle_cpu_threshold_pct: float = Field(5.0, ge=0, le=100)
+    min_action_saving_usd: float = Field(20.0, ge=0)
+    spike_threshold_pct: float = Field(10.0, ge=0)
+    top_movers_limit: int = Field(5, ge=1)
 
     # Tools
-    tool_timeout_s: float = 5.0
-    tool_max_attempts: int = 2
-    tool_retry_backoff_s: float = 0.2
-    fault_timeout_sleep_s: float | None = None  # defaults to 2 x tool_timeout_s
+    tool_timeout_s: float = Field(5.0, gt=0)
+    tool_max_attempts: int = Field(2, ge=1)
+    tool_retry_backoff_s: float = Field(0.2, ge=0)
+    fault_timeout_sleep_s: float | None = Field(None, gt=0)  # defaults to 2 x tool_timeout_s
 
     # API
     viewer_keys: str = "viewer-dev-key"

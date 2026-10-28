@@ -1,4 +1,7 @@
-"""``python -m evals --client scripted|anthropic --repeats N --out reports/evals/<client>``"""
+"""Run the eval dataset: ``python -m evals --client scripted|anthropic --repeats N [--out DIR]``.
+
+DIR defaults to reports/evals/local/<client> (git-ignored).
+"""
 
 from __future__ import annotations
 
@@ -32,7 +35,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--client", choices=["scripted", "anthropic"], default="scripted")
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--cases", help="comma-separated case ids (default: all)")
-    parser.add_argument("--out", type=Path, help="output directory (default: reports/evals/<client>)")
+    parser.add_argument(
+        "--out", type=Path, help="output directory (default: reports/evals/local/<client>, git-ignored)"
+    )
     args = parser.parse_args(argv)
 
     settings = eval_settings(args.client)
@@ -45,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
 
         return AnthropicLLMClient(settings)
 
-    out = args.out or Path("reports") / "evals" / args.client
+    out = args.out or Path("reports") / "evals" / "local" / args.client
     report = asyncio.run(
         run_evals(
             client=args.client,

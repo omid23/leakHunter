@@ -25,7 +25,9 @@ def cost_tool(settings, fixtures_dir):
 
 @pytest.fixture
 def details_tool(settings, fixtures_dir):
-    return GetResourceDetailsTool(BillingRepository(fixtures_dir), ResourceRepository(fixtures_dir), settings)
+    return GetResourceDetailsTool(
+        BillingRepository(fixtures_dir), ResourceRepository(fixtures_dir), FixedClock(settings.now), settings
+    )
 
 
 async def test_current_period_comparison_matches_fixture_story(cost_tool):
@@ -84,6 +86,14 @@ async def test_resource_details_produce_findings_with_data_savings(details_tool)
     assert by_id["asg-web-prod"].findings == []
     [small] = by_id["i-0c9d8e7f6a5b43210"].findings
     assert small.below_threshold and small.recommended_action is None
+
+
+async def test_resource_details_refuse_stale_exports_too(settings, fixtures_dir):
+    late = FixedClock(datetime(2026, 11, 20, tzinfo=timezone.utc))
+    tool = GetResourceDetailsTool(BillingRepository(fixtures_dir), ResourceRepository(fixtures_dir), late, settings)
+    with pytest.raises(ToolError) as exc:
+        await tool.run(GetResourceDetailsArgs(resource_ids=[IDLE]))
+    assert exc.value.kind is ErrorKind.stale_data
 
 
 async def test_resource_details_rejects_too_many_ids(details_tool):

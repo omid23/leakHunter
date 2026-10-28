@@ -27,6 +27,8 @@ class ToolRuntime:
         max_attempts: int,
         backoff_s: float,
     ) -> None:
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be at least 1")
         self.registry = registry
         self.timeout_s = timeout_s
         self.max_attempts = max_attempts
@@ -48,6 +50,7 @@ class ToolRuntime:
 
         kind: ErrorKind = ErrorKind.internal
         message = ""
+        attempt = 0
         for attempt in range(1, self.max_attempts + 1):
             attempt_started = time.perf_counter()
             try:

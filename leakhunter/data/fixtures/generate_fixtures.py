@@ -12,17 +12,9 @@ import csv
 import json
 from pathlib import Path
 
+from leakhunter.data.billing_repository import COLUMNS as HEADER
+
 HERE = Path(__file__).parent
-HEADER = [
-    "bill_period",
-    "usage_date",
-    "service",
-    "usage_type",
-    "resource_id",
-    "usage_amount",
-    "unblended_cost",
-    "env",
-]
 GENERATED_AT = "2026-11-01T06:00:00Z"
 
 # resource_id -> (service, usage_type, env, daily usage amount, {period: daily cost})

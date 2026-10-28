@@ -40,6 +40,7 @@ class ErrorKind(str, Enum):
     # run errors
     invalid_model_output = "invalid_model_output"
     llm_unavailable = "llm_unavailable"
+    llm_request_rejected = "llm_request_rejected"
     model_refusal = "model_refusal"
     max_steps = "max_steps"
 

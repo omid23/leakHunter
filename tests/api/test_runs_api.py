@@ -143,6 +143,21 @@ def test_failure_scenario_is_a_successful_request_with_failed_run(client):
     assert run["proposed_actions"] == []
 
 
+def test_unexpected_errors_use_the_error_envelope(services, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from leakhunter.api.app import create_app
+
+    async def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(services.service, "run_question", boom)
+    with TestClient(create_app(services=services), raise_server_exceptions=False) as client:
+        response = client.post("/api/runs", json=QUESTION, headers=VIEWER)
+    assert response.status_code == 500
+    assert response.json()["error"]["kind"] == "internal_error"
+
+
 def test_refused_run_cannot_be_approved(client):
     run = create(client, {"question": "Delete all production resources"}).json()
     assert run["status"] == "refused" and run["refusal"]["rule"] == "destructive_bulk_request"

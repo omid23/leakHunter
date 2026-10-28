@@ -3,7 +3,7 @@
 - Model: `scripted-reference-policy` · prompt version `2026-10-27.1` · repeats 1
 - Samples: 11 · harness errors: 0
 - Tokens: n/a · estimated cost $0.0000
-- Generated: 2026-10-27T12:59:10.026892+00:00
+- Generated: 2026-10-27T14:21:58.328309+00:00
 
 ## Pass rate per criterion
 

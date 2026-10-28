@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from leakhunter.domain.grounding import check_grounding, collect_numbers
+from leakhunter.domain.grounding import check_grounding, collect_figures
 from leakhunter.domain.models import (
     ActionType,
     AnalysisReport,
@@ -19,6 +19,7 @@ from leakhunter.domain.models import (
 )
 from leakhunter.domain.money import money
 from leakhunter.domain.safety import ACTION_ALLOWLIST
+from leakhunter.tools.cost_tools import RESOURCE_DETAILS_TOOL
 
 log = logging.getLogger("leakhunter.validator")
 
@@ -48,7 +49,7 @@ def extract_json(text: str) -> str:
 def evidence_findings(evidence: dict[str, list[dict[str, Any]]]) -> list[Finding]:
     return [
         Finding.model_validate(finding)
-        for result in evidence.get("get_resource_details", [])
+        for result in evidence.get(RESOURCE_DETAILS_TOOL, [])
         for detail in result.get("details", [])
         for finding in detail.get("findings", [])
     ]
@@ -111,7 +112,7 @@ class ReportValidator:
 
         for violation in violations:
             log.warning("proposal dropped", extra={"violation": violation})
-        numbers = collect_numbers(evidence)
+        numbers = collect_figures(evidence)
         numbers.add(money(sum(p.estimated_monthly_saving for p in proposals)))
         numbers.add(money(sum(f.estimated_monthly_saving for f in actionable.values())))
         grounding = check_grounding(report, numbers, corrections)

@@ -2,7 +2,7 @@
 
 import pytest
 
-from leakhunter.agent.llm import LLMRequest, LLMResponse, LLMUnavailableError, ToolCall
+from leakhunter.agent.llm import LLMRequest, LLMRequestError, LLMResponse, LLMUnavailableError, ToolCall
 from leakhunter.agent.scripted_client import ScriptedLLMClient
 from leakhunter.bootstrap import build_services
 from leakhunter.domain.models import ErrorKind, RunStatus
@@ -49,6 +49,12 @@ async def test_llm_unavailable_fails_visibly_without_actions(settings):
     run, services = await run_with(settings, Stub([LLMUnavailableError("connection refused")]))
     assert run.status is RunStatus.failed and run.error.kind is ErrorKind.llm_unavailable
     assert run.proposed_actions == [] and services.executor.executed == []
+
+
+async def test_rejected_request_is_reported_as_such(settings):
+    run, services = await run_with(settings, Stub([LLMRequestError("401 invalid api key")]))
+    assert run.status is RunStatus.failed and run.error.kind is ErrorKind.llm_request_rejected
+    assert services.executor.executed == []
 
 
 async def test_llm_timeout_is_unavailable(settings):

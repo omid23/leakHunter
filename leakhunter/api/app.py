@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -18,6 +19,7 @@ from leakhunter.domain.errors import InvalidTransition, RunNotFound, UnknownActi
 from leakhunter.logging_setup import configure_logging
 
 STATIC_DIR = Path(__file__).parent / "static"
+log = logging.getLogger("leakhunter.api")
 
 ERROR_STATUS: dict[type[Exception], tuple[int, str]] = {
     InvalidTransition: (409, "invalid_transition"),
@@ -57,5 +59,10 @@ def create_app(settings: Settings | None = None, services: Services | None = Non
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
         details = [{"loc": list(e["loc"]), "msg": e["msg"]} for e in exc.errors()]
         return JSONResponse(error_body("validation_error", "invalid request", details=details), status_code=422)
+
+    @app.exception_handler(Exception)
+    async def _unexpected(_: Request, exc: Exception) -> JSONResponse:
+        log.error("unhandled error", exc_info=exc)
+        return JSONResponse(error_body("internal_error", "unexpected server error"), status_code=500)
 
     return app

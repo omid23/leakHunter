@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T12:59:10.026892+00:00",
+  "generated_at": "2026-10-27T14:21:58.328309+00:00",
   "client": "scripted",
   "model": "scripted-reference-policy",
   "prompt_version": "2026-10-27.1",
@@ -230,8 +230,8 @@
   "usage": {},
   "estimated_cost_usd": 0.0,
   "llm_latency_ms": {
-    "mean": 0.18,
-    "max": 0.45
+    "mean": 0.12,
+    "max": 0.26
   },
   "breaches": []
 }

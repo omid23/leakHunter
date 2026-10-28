@@ -48,7 +48,7 @@ def build_tools_factory(settings: Settings, clock: Clock) -> ToolRuntimeFactory:
         registry = ToolRegistry(
             [
                 injector.tool(GetCostDataTool(source, clock, settings)),
-                injector.tool(GetResourceDetailsTool(source, resources, settings)),
+                injector.tool(GetResourceDetailsTool(source, resources, clock, settings)),
             ]
         )
         return ToolRuntime(

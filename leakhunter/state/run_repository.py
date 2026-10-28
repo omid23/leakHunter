@@ -36,6 +36,6 @@ class InMemoryRunRepository:
             return run.model_copy(deep=True)
 
     async def list(self) -> list[RunState]:
+        """Newest first by insertion order: wall-clock timestamps tie on coarse clocks (Windows ticks every 15 ms)."""
         async with self._lock:
-            runs = [run.model_copy(deep=True) for run in self._runs.values()]
-        return sorted(runs, key=lambda r: r.created_at, reverse=True)
+            return [run.model_copy(deep=True) for run in reversed(self._runs.values())]

@@ -68,9 +68,7 @@ jobs:
         if: always()
         with:
           name: browser-screenshots
-          path: |
-            reports/screenshots/
-            test-results/
+          path: test-results/
 
   # Deployment checks (skeleton): runs where the deploy happens, against the deployed configuration.
   deploy-smoke:

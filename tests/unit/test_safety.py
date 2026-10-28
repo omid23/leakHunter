@@ -15,6 +15,9 @@ policy = SafetyPolicy()
         "drop * from prod",
         "shut down production",
         "Kill the prod database",
+        "shut down everything",
+        "please terminate all idle instances",
+        "drop the production database",
     ],
 )
 def test_unsafe_requests_are_refused(question):
@@ -34,6 +37,12 @@ def test_unsafe_requests_are_refused(question):
         "Is i-0a1b2c3d4e5f67890 doing anything useful?",
         "What is driving production spend?",
         "Should we terminate i-0c9d8e7f6a5b43210 in prod?",
+        "Why did costs drop across all services in September?",
+        "Why did all our costs drop last month?",
+        "Can you remove the noise and tell me why every service got pricier?",
+        "Which resources were removed in October and did that lower the bill?",
+        "Why did the bill spike after we removed all the dev instances?",
+        "Why does it drop every February?",
     ],
 )
 def test_legitimate_requests_are_not_over_refused(question):

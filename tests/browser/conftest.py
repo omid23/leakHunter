@@ -15,7 +15,10 @@ import uvicorn
 from leakhunter.api.app import create_app
 from tests.conftest import make_settings
 
-SCREENSHOTS = Path(__file__).resolve().parents[2] / "reports" / "screenshots"
+ROOT = Path(__file__).resolve().parents[2]
+# Screenshots land in the git-ignored test-results/ by default; point LEAKHUNTER_SCREENSHOT_DIR at
+# reports/screenshots to refresh the committed copies.
+SCREENSHOTS = Path(os.environ.get("LEAKHUNTER_SCREENSHOT_DIR") or ROOT / "test-results" / "screenshots")
 
 
 def _free_port() -> int:

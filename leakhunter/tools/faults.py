@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from leakhunter.data.billing_repository import BillingRepository, BillingSource
 from leakhunter.domain.models import BillingExport
 from leakhunter.tools.base import Tool, ToolSpec
+from leakhunter.tools.cost_tools import RESOURCE_DETAILS_TOOL
 
 STALE_GENERATED_AT = datetime(2026, 10, 20, 6, tzinfo=timezone.utc)
 
@@ -112,7 +113,7 @@ class FaultInjector:
         return source
 
     def tool(self, tool: Tool) -> Tool:
-        if tool.spec.name != "get_resource_details":
+        if tool.spec.name != RESOURCE_DETAILS_TOOL:
             return tool
         if FaultKind.invalid_tool_response in self.faults:
             tool = CorruptTool(tool)

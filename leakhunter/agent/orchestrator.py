@@ -138,7 +138,7 @@ class CostAgent:
         except LLMUnavailableError as exc:
             self._fail(run, ErrorKind.llm_unavailable, f"LLM unavailable: {exc}")
         except LLMError as exc:
-            self._fail(run, ErrorKind.llm_unavailable, f"LLM request failed: {exc}")
+            self._fail(run, ErrorKind.llm_request_rejected, f"LLM request rejected: {exc}")
         finally:
             run.messages = [m.model_dump(mode="json") for m in messages]
 

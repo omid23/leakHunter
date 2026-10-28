@@ -12,7 +12,9 @@ from typing import Any
 
 from leakhunter.agent.llm import LLMRequest, LLMResponse, Message, ToolCall
 from leakhunter.agent.prompts import parse_question
+from leakhunter.domain.identifiers import find_resource_ids
 from leakhunter.domain.models import AnalysisReport, ReportAction, RootCause
+from leakhunter.tools.cost_tools import COST_DATA_TOOL, RESOURCE_DETAILS_TOOL
 
 _MONTHS = {
     name: index
@@ -37,7 +39,6 @@ _MONTHS = {
 }
 _MONTH_RE = re.compile(r"\b(" + "|".join(sorted(_MONTHS, key=len, reverse=True)) + r")\b", re.IGNORECASE)
 _ISO_PERIOD_RE = re.compile(r"\b(\d{4})-(0[1-9]|1[0-2])\b")
-_RESOURCE_ID_RE = re.compile(r"\b(?:i|vol|nat|db|asg|s3)-[0-9a-z][0-9a-z-]*\b")
 _CURRENT_PERIOD_RE = re.compile(r"^Current billing period: (\d{4}-\d{2})$", re.MULTILINE)
 
 DRIVER_SHARE = 0.10  # a mover is a root cause when it explains >= 10 % of the increase
@@ -77,18 +78,18 @@ class ScriptedLLMClient:
         results = _tool_results(request.messages)
         tools = {tool["name"] for tool in request.tools}
 
-        if "get_cost_data" not in results and "get_cost_data" in tools:
+        if COST_DATA_TOOL not in results and COST_DATA_TOOL in tools:
             period = parse_period(question, current_period)
-            return self._call("get_cost_data", {"period": period, "compare_with_previous": True})
+            return self._call(COST_DATA_TOOL, {"period": period, "compare_with_previous": True})
 
-        cost, cost_error = results.get("get_cost_data", (None, None))
-        if cost is not None and "get_resource_details" not in results and "get_resource_details" in tools:
-            ids = _RESOURCE_ID_RE.findall(question) + [m["resource_id"] for m in cost["comparison"]["top_movers"]]
+        cost, cost_error = results.get(COST_DATA_TOOL, (None, None))
+        if cost is not None and RESOURCE_DETAILS_TOOL not in results and RESOURCE_DETAILS_TOOL in tools:
+            ids = find_resource_ids(question) + [m["resource_id"] for m in cost["comparison"]["top_movers"]]
             ids = list(dict.fromkeys(ids))[:5]
             if ids:
-                return self._call("get_resource_details", {"resource_ids": ids, "period": cost["comparison"]["period"]})
+                return self._call(RESOURCE_DETAILS_TOOL, {"resource_ids": ids, "period": cost["comparison"]["period"]})
 
-        details, details_error = results.get("get_resource_details", (None, None))
+        details, details_error = results.get(RESOURCE_DETAILS_TOOL, (None, None))
         report = build_report(question, cost, cost_error, details, details_error)
         return LLMResponse(stop_reason="end_turn", text=report.model_dump_json(), model=self.model)
 
@@ -158,7 +159,7 @@ def build_report(
             f"within the {c['spike_threshold_pct']:g}% spike threshold."
         )
 
-    for rid in dict.fromkeys(_RESOURCE_ID_RE.findall(question)):
+    for rid in find_resource_ids(question):
         if rid in detail_by_id:
             summary.append(_describe_resource(detail_by_id[rid]))
 

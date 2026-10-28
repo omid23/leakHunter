@@ -1,4 +1,4 @@
-from leakhunter.domain.grounding import check_grounding, collect_numbers, extract_figures
+from leakhunter.domain.grounding import check_grounding, collect_figures, extract_figures
 from leakhunter.domain.models import AnalysisReport, ProposalCorrection, ReportAction, RootCause
 
 
@@ -29,8 +29,28 @@ def test_extract_figures_handles_commas_signs_and_percentages():
     assert extract_figures("5 malformed rows") == []
 
 
-def test_collect_numbers_is_recursive_and_absolute():
-    assert collect_numbers({"a": [1, {"b": -2.5}], "c": True, "d": "7"}) == {1.0, 2.5}
+def test_collect_figures_keeps_money_and_percent_values_only():
+    evidence = {
+        "comparison": {
+            "current_total": 1543.27,
+            "top_movers": [{"delta_abs": -571.39, "delta_pct": None, "resource_id": "i-1"}],
+            "by_service_current": {"AmazonEC2": 731.39},
+            "is_spike": True,
+        },
+        "data_quality": {"total_rows": 217, "skipped_rows": 5, "age_hours": 27.0, "skipped_reasons": {"bad_cost": 1}},
+        "details": [{"resource": {"size_gib": 2000, "instance_count": 3, "avg_cpu_7d_pct": 2.1}, "period_cost": 7.74}],
+    }
+    assert collect_figures(evidence) == {1543.27, 571.39, 731.39, 2.1, 7.74}
+
+
+def test_counts_and_sizes_never_ground_dollar_amounts():
+    evidence = {
+        "data_quality": {"total_rows": 217},
+        "resource": {"size_gib": 2000, "avg_cpu_7d_pct": 2.1},
+        "comparison": {"current_total": 5.0, "delta_abs": 571.39},
+    }
+    result = check_grounding(report("Row count $217.00, volume $2,000.00, total $5.00"), collect_figures(evidence))
+    assert [u.split(" ")[0] for u in result.unmatched] == ["217", "2000"]
 
 
 def test_grounded_report_passes():

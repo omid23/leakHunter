@@ -1,6 +1,7 @@
 import pytest
 
 from leakhunter.data.billing_repository import BillingRepository
+from leakhunter.data.clock import FixedClock
 from leakhunter.data.resource_repository import ResourceRepository
 from leakhunter.domain.models import ErrorKind
 from leakhunter.tools.base import ToolRegistry
@@ -42,7 +43,7 @@ def test_faults_compose(repo):
 
 
 async def test_timeout_fault_wraps_only_resource_details(settings, repo, fixtures_dir):
-    tool = GetResourceDetailsTool(repo, ResourceRepository(fixtures_dir), settings)
+    tool = GetResourceDetailsTool(repo, ResourceRepository(fixtures_dir), FixedClock(settings.now), settings)
     wrapped = FaultInjector([FaultKind.tool_timeout], 0.2).tool(tool)
     assert isinstance(wrapped, SlowTool) and wrapped.spec is tool.spec
     runtime = ToolRuntime(ToolRegistry([wrapped]), timeout_s=0.05, max_attempts=2, backoff_s=0)
